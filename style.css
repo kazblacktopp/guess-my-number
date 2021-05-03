@@ -120,3 +120,7 @@ h1 {
 .bg-color {
   background-color: #60b347;
 }
+
+.win-box {
+  width: 30rem;
+}
