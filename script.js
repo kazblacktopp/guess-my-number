@@ -1,65 +1,80 @@
 "use strict";
 
 // DOM elements
-const message = document.querySelector(".message");
-const score = document.querySelector(".score");
-const checkBox = document.querySelector(".check");
 const guess = document.querySelector(".guess");
-const body = document.querySelector("body");
-const number = document.querySelector(".number");
-const highScoreLabel = document.querySelector(".highscore");
-const againButton = document.querySelector(".again");
 
 // State variables
 let randNumber = randomNumber();
 let currentScore = 20;
 let highscore = 0;
 
-// Random number generator function
+// Functions
 function randomNumber() {
   return Math.trunc(Math.random() * 20 + 1);
 }
 
-// Add event listener for user input
-checkBox.addEventListener("click", checkGuess);
+function setTextContent(className, value) {
+  document.querySelector(className).textContent = value;
+}
 
-// Process user input
+function eventListener(className, action, functionName) {
+  const selector = document.querySelector(className);
+  action === "add"
+    ? selector.addEventListener("click", functionName)
+    : selector.removeEventListener("click", functionName);
+}
+
+function editClassList(selector, editType, className) {
+  const element = document.querySelector(selector);
+  editType === "add"
+    ? element.classList.add(className)
+    : element.classList.remove(className);
+}
+
 function checkGuess() {
   const currentGuess = Number(guess.value);
   if (currentGuess === randNumber) {
-    message.textContent = "🎉 Correct Number!";
-    body.classList.add("bg-color");
-    number.textContent = randNumber;
+    setTextContent(".message", "🎉 Correct Number!");
+    editClassList("body", "add", "bg-color");
+    setTextContent(".number", randNumber);
+    editClassList(".number", "add", "win-box");
     if (currentScore > highscore) {
-      highScoreLabel.textContent = currentScore;
+      setTextContent(".highscore", currentScore);
       highscore = currentScore;
     }
   } else {
     if (currentScore > 1) {
       if (!currentGuess) {
-        message.textContent = "⛔️ No number!";
-      } else if (currentGuess < randNumber) {
-        message.textContent = "📉 Too low!";
-      } else if (currentGuess > randNumber) {
-        message.textContent = "📈 Too high!";
+        setTextContent(".message", "⛔️ No number!");
+      } else {
+        setTextContent(
+          ".message",
+          currentGuess < randNumber ? "📉 Too low!" : "📈 Too high!"
+        );
       }
     } else {
-      message.textContent = "💥 You lost the game!";
-      checkBox.removeEventListener("click", checkGuess);
+      setTextContent(".message", "💥 You lost the game!");
+      eventListener(".check", "remove", checkGuess);
     }
     currentScore--;
-    score.textContent = currentScore;
+    setTextContent(".score", currentScore);
   }
 }
 
-// Reset game when 'Again' button clicked
-againButton.addEventListener("click", function () {
+function gameReset() {
   randNumber = randomNumber();
   currentScore = 20;
-  body.classList.remove("bg-color");
-  number.textContent = "?";
-  message.textContent = "Start guessing...";
-  score.textContent = currentScore;
+  editClassList("body", "remove", "bg-color");
+  setTextContent(".number", "?");
+  editClassList(".number", "remove", "win-box");
+  setTextContent(".message", "Start guessing...");
+  setTextContent(".score", currentScore);
   guess.value = "";
-  checkBox.addEventListener("click", checkGuess);
-});
+  eventListener(".check", "add", checkGuess);
+}
+
+// Event listener for user input
+eventListener(".check", "add", checkGuess);
+
+// Reset game when 'Again' button clicked
+eventListener(".again", "add", gameReset);
